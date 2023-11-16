@@ -188,12 +188,25 @@ public class Board
             {
                 Cell cell = m_cells[x, y];
                 if (!cell.IsEmpty) continue;
+                var type = Utils.GetRandomNormalType();
+
+                var neighbourTypes =  GetNeighbourTypes(cell);
+                var itemTypeLeast = GetItemTypeLeast();
+
+                if (neighbourTypes.Contains(itemTypeLeast) == false)
+                {
+                    type = itemTypeLeast;
+                }
+                else
+                {
+                    type = Utils.GetRandomNormalTypeExcept(neighbourTypes.ToArray());
+                }
 
                 NormalItem item;
                 if (m_normalItemPool == null && m_normalItemPool.Count <= 0)
                 {
                     item = new NormalItem();
-                    item.SetType(Utils.GetRandomNormalType());
+                    item.SetType(type);
                     cell.Assign(item);
                     cell.ApplyItemPosition(true);
                     item.SetView();
@@ -204,16 +217,93 @@ public class Board
                     var itemInPool = m_normalItemPool[m_normalItemPool.Count - 1];
                     m_normalItemPool.Remove(itemInPool);
                     item = itemInPool;
-                    var typeRandom = Utils.GetRandomNormalType();
                     item.SetViewRoot(m_root);
-                    item.SetType(typeRandom);
-                    item.SetView(m_normalItemObject, m_itemInfoSO.GetSpriteItem(typeRandom));
+                    item.SetType(type);
+                    item.SetView(m_normalItemObject, m_itemInfoSO.GetSpriteItem(type));
                     item.SetDefaultScale();
                     cell.Assign(item);
                     cell.ApplyItemPosition(true);
                 }
             }
         }
+    }
+
+    private List<NormalItem.eNormalType> GetNeighbourTypes(Cell cell)
+    {
+        List<NormalItem.eNormalType> neighbourTypes = new List<NormalItem.eNormalType>();
+
+        if (cell.NeighbourBottom != null)
+        {
+            NormalItem nitem = cell.NeighbourBottom.Item as NormalItem;
+            if (nitem != null)
+            {
+                neighbourTypes.Add(nitem.ItemType);
+            }
+        }
+
+        if (cell.NeighbourUp != null)
+        {
+            NormalItem nitem = cell.NeighbourUp.Item as NormalItem;
+            if (nitem != null)
+            {
+                neighbourTypes.Add(nitem.ItemType);
+            }
+        }
+
+        if (cell.NeighbourLeft != null)
+        {
+            NormalItem nitem = cell.NeighbourLeft.Item as NormalItem;
+            if (nitem != null)
+            {
+                neighbourTypes.Add(nitem.ItemType);
+            }
+        }
+
+        if (cell.NeighbourRight != null)
+        {
+            NormalItem nitem = cell.NeighbourRight.Item as NormalItem;
+            if (nitem != null)
+            {
+                neighbourTypes.Add(nitem.ItemType);
+            }
+        }
+
+        return neighbourTypes;
+    }
+
+    private NormalItem.eNormalType GetItemTypeLeast()
+    {
+        Dictionary<NormalItem.eNormalType, int> normalTypeInBordDict = new Dictionary<NormalItem.eNormalType, int>();
+        for (int x = 0; x < boardSizeX; x++)
+        {
+            for (int y = 0; y < boardSizeY; y++)
+            {
+                NormalItem nitem = m_cells[x, y].Item as NormalItem;
+                if (nitem != null)
+                {
+                    NormalItem.eNormalType type = nitem.ItemType;
+
+                    if (normalTypeInBordDict.ContainsKey(type) == false)
+                    {
+                        normalTypeInBordDict.Add(type, 1);
+                    }
+                    else
+                    {
+                        normalTypeInBordDict[type] = normalTypeInBordDict[type]++;
+                    }
+                }
+            }
+        }
+        NormalItem.eNormalType result = NormalItem.eNormalType.TYPE_ONE;
+
+        if (normalTypeInBordDict.Count > 0)
+        {
+            var normalTypeInBordList = normalTypeInBordDict.ToList();
+            normalTypeInBordList.Sort((x, y) => x.Value.CompareTo(y.Value));
+
+            result = normalTypeInBordList[0].Key;
+        }
+        return result;
     }
 
     internal void ExplodeAllItems()
