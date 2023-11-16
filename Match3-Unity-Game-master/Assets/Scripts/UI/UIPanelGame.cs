@@ -4,22 +4,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIPanelGame : MonoBehaviour,IMenu
+public class UIPanelGame : MonoBehaviour, IMenu
 {
     public Text LevelConditionView;
 
     [SerializeField] private Button btnPause;
+    [SerializeField] private Button btnRePlay;
 
     private UIMainManager m_mngr;
 
     private void Awake()
     {
         btnPause.onClick.AddListener(OnClickPause);
+        btnRePlay.onClick.AddListener(OnClickRePlay);
     }
 
     private void OnClickPause()
     {
         m_mngr.ShowPauseMenu();
+    }
+
+    private void OnClickRePlay()
+    {
+        m_mngr.RePlay();
     }
 
     public void Setup(UIMainManager mngr)

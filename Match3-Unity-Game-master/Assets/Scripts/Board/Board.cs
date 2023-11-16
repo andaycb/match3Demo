@@ -33,6 +33,8 @@ public class Board
 
     private List<NormalItem> m_normalItemPool;
 
+    private GameObject PoolParent;
+
     public Board(Transform transform, GameSettings gameSettings, ItemInfoSO itemInfoSO, NormalItemObject normalItemObject)
     {
         m_root = transform;
@@ -66,7 +68,7 @@ public class Board
         {
             m_normalItemPool = new List<NormalItem>();
         }
-        GameObject pool = new GameObject("Pool");
+        PoolParent = new GameObject("Pool");
         int sizePool = (boardSizeX * boardSizeY) / 4;
         for (int i = 0; i < sizePool; i++)
         {
@@ -74,7 +76,7 @@ public class Board
             var type = NormalItem.eNormalType.TYPE_ONE;
             item.SetType(type);
             item.SetView(m_normalItemObject, m_itemInfoSO.GetSpriteItem(type));
-            item.SetViewRoot(pool.transform);
+            item.SetViewRoot(PoolParent.transform);
             item.SetViewPosition(m_PoolPos);
             item.SetBoard(this);
         }
@@ -822,5 +824,13 @@ public class Board
                 m_cells[x, y] = null;
             }
         }
+
+        for (int i = 0; i < m_normalItemPool.Count; i++)
+        {
+            var item = m_normalItemPool[i];
+            item.Clear();
+        }
+        m_normalItemPool.Clear();
+        GameObject.Destroy(PoolParent);
     }
 }

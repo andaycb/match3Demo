@@ -66,6 +66,9 @@ public class UIMainManager : MonoBehaviour
             case GameManager.eStateGame.PAUSE:
                 ShowMenu<UIPanelPause>();
                 break;
+            case GameManager.eStateGame.REPLAY:
+                m_gameManager.RePlay();
+                break;
             case GameManager.eStateGame.GAME_OVER:
                 ShowMenu<UIPanelGameOver>();
                 break;
@@ -77,14 +80,14 @@ public class UIMainManager : MonoBehaviour
         for (int i = 0; i < m_menuList.Length; i++)
         {
             IMenu menu = m_menuList[i];
-            if(menu is T)
+            if (menu is T)
             {
                 menu.Show();
             }
             else
             {
                 menu.Hide();
-            }            
+            }
         }
     }
 
@@ -97,6 +100,12 @@ public class UIMainManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    internal void RePlay()
+    {
+        m_gameManager.ClearLevel();
+        m_gameManager.RePlay();
     }
 
     internal void ShowPauseMenu()
