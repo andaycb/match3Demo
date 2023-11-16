@@ -25,18 +25,59 @@ public class Board
 
     private int m_matchMin;
 
-    public Board(Transform transform, GameSettings gameSettings)
+    private Vector3 m_PoolPos = new Vector3(1000, 1000, 0);
+
+    private ItemInfoSO m_itemInfoSO;
+    private NormalItemObject m_normalItemObject;
+
+
+    private List<NormalItem> m_normalItemPool;
+
+    public Board(Transform transform, GameSettings gameSettings, ItemInfoSO itemInfoSO, NormalItemObject normalItemObject)
     {
         m_root = transform;
 
         m_matchMin = gameSettings.MatchesMin;
+        m_itemInfoSO = itemInfoSO;
+        m_normalItemObject = normalItemObject;
 
         this.boardSizeX = gameSettings.BoardSizeX;
         this.boardSizeY = gameSettings.BoardSizeY;
 
         m_cells = new Cell[boardSizeX, boardSizeY];
 
+        CreateItemPool();
         CreateBoard();
+    }
+
+    public void AddToPool(NormalItem item)
+    {
+        if (m_normalItemPool == null)
+        {
+            m_normalItemPool = new List<NormalItem>();
+        }
+        item.SetViewPosition(m_PoolPos);
+        m_normalItemPool.Add(item);
+    }
+
+    private void CreateItemPool()
+    {
+        if (m_normalItemPool == null)
+        {
+            m_normalItemPool = new List<NormalItem>();
+        }
+        GameObject pool = new GameObject("Pool");
+        int sizePool = (boardSizeX * boardSizeY) / 4;
+        for (int i = 0; i < sizePool; i++)
+        {
+            NormalItem item = new NormalItem();
+            var type = NormalItem.eNormalType.TYPE_ONE;
+            item.SetType(type);
+            item.SetView(m_normalItemObject, m_itemInfoSO.GetSpriteItem(type));
+            item.SetViewRoot(pool.transform);
+            item.SetViewPosition(m_PoolPos);
+            item.SetBoard(this);
+        }
     }
 
     private void CreateBoard()
@@ -100,9 +141,12 @@ public class Board
                     }
                 }
 
-                item.SetType(Utils.GetRandomNormalTypeExcept(types.ToArray()));
-                item.SetView();
+                var type = Utils.GetRandomNormalTypeExcept(types.ToArray());
+
+                item.SetType(type);
+                item.SetView(m_normalItemObject, m_itemInfoSO.GetSpriteItem(type));
                 item.SetViewRoot(m_root);
+                item.SetBoard(this);
 
                 cell.Assign(item);
                 cell.ApplyItemPosition(false);
@@ -145,14 +189,29 @@ public class Board
                 Cell cell = m_cells[x, y];
                 if (!cell.IsEmpty) continue;
 
-                NormalItem item = new NormalItem();
-
-                item.SetType(Utils.GetRandomNormalType());
-                item.SetView();
-                item.SetViewRoot(m_root);
-
-                cell.Assign(item);
-                cell.ApplyItemPosition(true);
+                NormalItem item;
+                if (m_normalItemPool == null && m_normalItemPool.Count <= 0)
+                {
+                    item = new NormalItem();
+                    item.SetType(Utils.GetRandomNormalType());
+                    cell.Assign(item);
+                    cell.ApplyItemPosition(true);
+                    item.SetView();
+                    item.SetViewRoot(m_root);
+                }
+                else
+                {
+                    var itemInPool = m_normalItemPool[m_normalItemPool.Count - 1];
+                    m_normalItemPool.Remove(itemInPool);
+                    item = itemInPool;
+                    var typeRandom = Utils.GetRandomNormalType();
+                    item.SetViewRoot(m_root);
+                    item.SetType(typeRandom);
+                    item.SetView(m_normalItemObject, m_itemInfoSO.GetSpriteItem(typeRandom));
+                    item.SetDefaultScale();
+                    cell.Assign(item);
+                    cell.ApplyItemPosition(true);
+                }
             }
         }
     }
@@ -350,7 +409,7 @@ public class Board
         var dir = GetMatchDirection(matches);
 
         var bonus = matches.Where(x => x.Item is BonusItem).FirstOrDefault();
-        if(bonus == null)
+        if (bonus == null)
         {
             return matches;
         }

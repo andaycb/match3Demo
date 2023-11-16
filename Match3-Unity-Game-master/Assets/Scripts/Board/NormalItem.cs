@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -58,5 +59,25 @@ public class NormalItem : Item
         NormalItem it = other as NormalItem;
 
         return it != null && it.ItemType == this.ItemType;
+    }
+
+    internal override void ExplodeView()
+    {
+        if (View)
+        {
+            View.DOScale(0.1f, 0.1f).OnComplete(() =>
+            {
+                if (m_Board != null)
+                {
+                    m_Board.AddToPool(this);
+                }
+                else
+                {
+                    GameObject.Destroy(View.gameObject);
+                    View = null;
+                }
+            }
+        );
+        }
     }
 }

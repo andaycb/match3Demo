@@ -31,7 +31,9 @@ public class BoardController : MonoBehaviour
 
     private bool m_gameOver;
 
-    public void StartGame(GameManager gameManager, GameSettings gameSettings)
+  
+
+    public void StartGame(GameManager gameManager, GameSettings gameSettings, ItemInfoSO m_itemInfoSO, NormalItemObject m_normalItemObject)
     {
         m_gameManager = gameManager;
 
@@ -41,7 +43,7 @@ public class BoardController : MonoBehaviour
 
         m_cam = Camera.main;
 
-        m_board = new Board(this.transform, gameSettings);
+        m_board = new Board(this.transform, gameSettings, m_itemInfoSO, m_normalItemObject);
 
         Fill();
     }

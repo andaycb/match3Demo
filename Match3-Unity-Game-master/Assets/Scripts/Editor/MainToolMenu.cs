@@ -30,4 +30,18 @@ public class MainToolMenu
         Selection.activeObject = asset;
     }
 
+
+
+    [MenuItem(menuTitle + "ItemInfoSO", false, 400)]
+    static void CreateItemInfos()
+    {
+        ItemInfoSO asset = ScriptableObject.CreateInstance<ItemInfoSO>();
+
+        AssetDatabase.CreateAsset(asset, "Assets/ScriptableObject/ItemInfoSO.asset");
+        AssetDatabase.SaveAssets();
+
+        EditorUtility.FocusProjectWindow();
+
+        Selection.activeObject = asset;
+    }
 }

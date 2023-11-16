@@ -45,6 +45,9 @@ public class GameManager : MonoBehaviour
 
     private LevelCondition m_levelCondition;
 
+    [SerializeField] private ItemInfoSO m_itemInfoSO;
+    [SerializeField] private NormalItemObject m_normalItemObject;
+
     private void Awake()
     {
         State = eStateGame.SETUP;
@@ -84,7 +87,7 @@ public class GameManager : MonoBehaviour
     public void LoadLevel(eLevelMode mode)
     {
         m_boardController = new GameObject("BoardController").AddComponent<BoardController>();
-        m_boardController.StartGame(this, m_gameSettings);
+        m_boardController.StartGame(this, m_gameSettings, m_itemInfoSO, m_normalItemObject);
 
         if (mode == eLevelMode.MOVES)
         {

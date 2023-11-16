@@ -9,8 +9,13 @@ public class Item
 {
     public Cell Cell { get; private set; }
 
-    public Transform View { get; private set; }
+    public Transform View { get; protected set; }
 
+    protected Board m_Board;
+    public void SetBoard(Board board)
+    {
+        m_Board = board;
+    }
 
     public virtual void SetView()
     {
@@ -23,6 +28,22 @@ public class Item
             {
                 View = GameObject.Instantiate(prefab).transform;
             }
+        }
+    }
+    private NormalItemObject normalItemCurrent;
+
+    public void SetView(NormalItemObject normalItemObject, Sprite sprite)
+    {
+        if (normalItemCurrent == null)
+        {
+            normalItemCurrent = NormalItemObject.Instantiate(normalItemObject);
+            normalItemCurrent.SetSprite(sprite);
+
+            View = normalItemCurrent.transform;
+        }
+        else
+        {
+            normalItemCurrent.SetSprite(sprite);
         }
     }
 
@@ -89,6 +110,14 @@ public class Item
         View.DOScale(scale, 0.1f);
     }
 
+    public void SetDefaultScale()
+    {
+        if (View)
+        {
+            View.localScale = Vector3.one;
+        }
+    }
+
     internal virtual bool IsSameType(Item other)
     {
         return false;
@@ -98,16 +127,14 @@ public class Item
     {
         if (View)
         {
-            View.DOScale(0.1f, 0.1f).OnComplete(
-                () =>
-                {
-                    GameObject.Destroy(View.gameObject);
-                    View = null;
-                }
-                );
+            View.DOScale(0.1f, 0.1f).OnComplete(() =>
+                           {
+                               GameObject.Destroy(View.gameObject);
+                               View = null;
+                           }
+                        );
         }
     }
-
 
 
     internal void AnimateForHint()
